@@ -1,0 +1,10 @@
+# Node.js (если вдруг появятся зависимости)
+node_modules/
+
+# Логи
+*.log
+
+# OS
+Thumbs.db
+Desktop.ini
+

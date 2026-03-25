@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Калькулятор семейного бюджета</title>
+
+<style>
+    /* --- Базовые цвета (светлая тема): меняются через [data-theme="dark"] на <html> --- */
+    :root {
+        --bg-page: #f4f6f9;
+        --bg-card: #fff;
+        --text-main: #1a1a1a;
+        --text-muted: #555;
+        --border: #ccc;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --summary-bg: #f1f1f1;
+        --item-border: #eee;
+        --input-bg: #fff;
+        --btn-income: #4CAF50;
+        --btn-income-hover: #45a049;
+        --btn-expense: #e74c3c;
+        --btn-expense-hover: #c0392b;
+        --balance-positive: #1b5e20;
+        --balance-negative: #b71c1c;
+        --theme-btn-bg: #fff;
+        --theme-btn-border: #ccc;
+        --theme-btn-shadow: rgba(0, 0, 0, 0.15);
+    }
+
+    /* Тёмная тема: те же переменные, другие значения */
+    html[data-theme="dark"] {
+        --bg-page: #12151c;
+        --bg-card: #1e232d;
+        --text-main: #e8eaed;
+        --text-muted: #9aa0a6;
+        --border: #3d4450;
+        --shadow: rgba(0, 0, 0, 0.45);
+        --summary-bg: #252b36;
+        --item-border: #3d4450;
+        --input-bg: #252b36;
+        --btn-income: #43a047;
+        --btn-income-hover: #388e3c;
+        --btn-expense: #ef5350;
+        --btn-expense-hover: #e53935;
+        --balance-positive: #69f0ae;
+        --balance-negative: #ff8a80;
+        --theme-btn-bg: #2d323c;
+        --theme-btn-border: #5f6368;
+        --theme-btn-shadow: rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: var(--bg-page);
+        color: var(--text-main);
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+        transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+        background: var(--bg-card);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px var(--shadow);
+        transition: background 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: var(--text-main);
+    }
+
+    h3 {
+        color: var(--text-main);
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    input, select, button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+        background: var(--input-bg);
+        color: var(--text-main);
+        box-sizing: border-box;
+    }
+
+    /* Кнопки действий внутри форм (не переключатель темы) */
+    .grid button {
+        background: var(--btn-income);
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .grid button:hover {
+        background: var(--btn-income-hover);
+    }
+
+    /* Кнопка «Добавить расход» в колонке с классом expenses */
+    .expenses button {
+        background: var(--btn-expense);
+    }
+
+    .expenses button:hover {
+        background: var(--btn-expense-hover);
+    }
+
+    .summary {
+        margin-top: 20px;
+        padding: 15px;
+        background: var(--summary-bg);
+        border-radius: 10px;
+        transition: background 0.25s ease;
+    }
+
+    .summary p {
+        font-size: 16px;
+        margin: 5px 0;
+        color: var(--text-main);
+    }
+
+    .list {
+        margin-top: 10px;
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 14px;
+        color: var(--text-main);
+    }
+
+    .item {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px solid var(--item-border);
+    }
+
+    .balance-positive {
+        color: var(--balance-positive);
+        font-weight: bold;
+    }
+
+    .balance-negative {
+        color: var(--balance-negative);
+        font-weight: bold;
+    }
+
+    /*
+     * Кнопка смены темы: всегда в правом нижнем углу экрана,
+     * не участвует в сетке калькулятора
+     */
+    .theme-toggle {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 1000;
+        width: 52px;
+        height: 52px;
+        padding: 0;
+        margin: 0;
+        border-radius: 50%;
+        border: 1px solid var(--theme-btn-border);
+        background: var(--theme-btn-bg);
+        box-shadow: 0 4px 14px var(--theme-btn-shadow);
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.25s ease;
+    }
+
+    .theme-toggle:hover {
+        transform: scale(1.06);
+        box-shadow: 0 6px 18px var(--theme-btn-shadow);
+    }
+
+    .theme-toggle:focus-visible {
+        outline: 2px solid var(--btn-income);
+        outline-offset: 3px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>💰 Калькулятор семейного бюджета</h1>
+
+    <div class="grid">
+
+        <!-- ДОХОДЫ -->
+        <div>
+            <h3>Доходы</h3>
+            <input type="text" id="incomeName" placeholder="Источник дохода">
+            <input type="number" id="incomeAmount" placeholder="Сумма">
+            <button type="button" onclick="addIncome()">Добавить доход</button>
+
+            <div class="list" id="incomeList"></div>
+        </div>
+
+        <!-- РАСХОДЫ: класс expenses окрашивает кнопку «Добавить расход» в красный -->
+        <div class="expenses">
+            <h3>Расходы</h3>
+            <input type="text" id="expenseName" placeholder="Категория расхода">
+            <input type="number" id="expenseAmount" placeholder="Сумма">
+            <button type="button" onclick="addExpense()">Добавить расход</button>
+
+            <div class="list" id="expenseList"></div>
+        </div>
+
+    </div>
+
+    <!-- ИТОГИ -->
+    <div class="summary">
+        <p>💵 Общий доход: <span id="totalIncome">0</span> ₽</p>
+        <p>💸 Общие расходы: <span id="totalExpense">0</span> ₽</p>
+        <p>📊 Баланс: <span id="balance">0</span> ₽</p>
+    </div>
+
+</div>
+
+<!--
+  Переключатель темы: вынесен за пределы .container,
+  чтобы кнопка была привязана к окну браузера (правый нижний угол).
+  aria-label обновляется скриптом для доступности со скринридерами.
+-->
+<button type="button"
+        id="themeToggle"
+        class="theme-toggle"
+        aria-label="Переключить тему"
+        title="Светлая / тёмная тема">🌙</button>
+
+<script>
+    let incomes = [];
+    let expenses = [];
+
+    /* Ключ в localStorage, чтобы тема запоминалась между визитами */
+    const THEME_STORAGE_KEY = 'family-budget-theme';
+
+    /**
+     * Читает сохранённую тему или системные настройки (prefers-color-scheme),
+     * выставляет data-theme на <html> и подпись на кнопке.
+     */
+    function initTheme() {
+        const saved = localStorage.getItem(THEME_STORAGE_KEY);
+        let theme = saved;
+
+        if (!theme) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            theme = prefersDark ? 'dark' : 'light';
+        }
+
+        document.documentElement.setAttribute('data-theme', theme);
+        updateThemeToggleButton(theme);
+    }
+
+    /** Переключает light ↔ dark и сохраняет выбор */
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem(THEME_STORAGE_KEY, next);
+        updateThemeToggleButton(next);
+    }
+
+    /** Иконка и подсказка: луна = «включить тёмную», солнце = «включить светлую» */
+    function updateThemeToggleButton(theme) {
+        const btn = document.getElementById('themeToggle');
+        if (!btn) return;
+
+        if (theme === 'dark') {
+            btn.textContent = '☀️';
+            btn.setAttribute('aria-label', 'Включить светлую тему');
+            btn.setAttribute('title', 'Светлая тема');
+        } else {
+            btn.textContent = '🌙';
+            btn.setAttribute('aria-label', 'Включить тёмную тему');
+            btn.setAttribute('title', 'Тёмная тема');
+        }
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    initTheme();
+
+    function addIncome() {
+        const name = document.getElementById('incomeName').value;
+        const amount = parseFloat(document.getElementById('incomeAmount').value);
+
+        if (!name || isNaN(amount)) {
+            alert("Заполните все поля дохода");
+            return;
+        }
+
+        incomes.push({ name, amount });
+        document.getElementById('incomeName').value = '';
+        document.getElementById('incomeAmount').value = '';
+
+        render();
+    }
+
+    function addExpense() {
+        const name = document.getElementById('expenseName').value;
+        const amount = parseFloat(document.getElementById('expenseAmount').value);
+
+        if (!name || isNaN(amount)) {
+            alert("Заполните все поля расхода");
+            return;
+        }
+
+        expenses.push({ name, amount });
+        document.getElementById('expenseName').value = '';
+        document.getElementById('expenseAmount').value = '';
+
+        render();
+    }
+
+    function render() {
+        const incomeList = document.getElementById('incomeList');
+        const expenseList = document.getElementById('expenseList');
+
+        incomeList.innerHTML = '';
+        expenseList.innerHTML = '';
+
+        let totalIncome = 0;
+        let totalExpense = 0;
+
+        incomes.forEach((item, index) => {
+            totalIncome += item.amount;
+
+            incomeList.innerHTML += `
+                <div class="item">
+                    <span>${item.name}</span>
+                    <span>${item.amount} ₽</span>
+                </div>
+            `;
+        });
+
+        expenses.forEach((item, index) => {
+            totalExpense += item.amount;
+
+            expenseList.innerHTML += `
+                <div class="item">
+                    <span>${item.name}</span>
+                    <span>${item.amount} ₽</span>
+                </div>
+            `;
+        });
+
+        const balance = totalIncome - totalExpense;
+
+        document.getElementById('totalIncome').innerText = totalIncome;
+        document.getElementById('totalExpense').innerText = totalExpense;
+
+        const balanceElement = document.getElementById('balance');
+        balanceElement.innerText = balance;
+
+        if (balance >= 0) {
+            balanceElement.className = "balance-positive";
+        } else {
+            balanceElement.className = "balance-negative";
+        }
+    }
+</script>
+
+</body>
+</html>

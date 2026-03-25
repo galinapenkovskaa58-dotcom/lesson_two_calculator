@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Семейный бюджет</title>
+
+    <style>
+        /* 
+         * Общая идея темы:
+         * - Цвета задаём через CSS-переменные.
+         * - Скрипт переключает атрибут `data-theme` у тега <html>.
+         * - Это даёт плавное переключение светлая/тёмная тема без перезагрузки.
+         */
+        :root {
+            --bg-page: #f4f6f9;
+            --bg-card: #fff;
+            --text-main: #1a1a1a;
+            --text-muted: #555;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --border: #e6e6e6;
+
+            --accent: #4CAF50;
+            --accent-hover: #45a049;
+
+            --theme-btn-bg: #ffffff;
+            --theme-btn-border: #cccccc;
+            --theme-btn-shadow: rgba(0, 0, 0, 0.15);
+        }
+
+        html[data-theme="dark"] {
+            --bg-page: #12151c;
+            --bg-card: #1e232d;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --shadow: rgba(0, 0, 0, 0.45);
+            --border: #3d4450;
+
+            --accent: #43a047;
+            --accent-hover: #388e3c;
+
+            --theme-btn-bg: #2d323c;
+            --theme-btn-border: #5f6368;
+            --theme-btn-shadow: rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: var(--bg-page);
+            color: var(--text-main);
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+
+        .wrap {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 40px;
+            line-height: 1.15;
+        }
+
+        .sub {
+            max-width: 760px;
+            margin: 0 auto;
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .card {
+            margin-top: 22px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px var(--shadow);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .feature {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            background: rgba(255,255,255,0.02);
+        }
+
+        html[data-theme="dark"] .feature {
+            background: rgba(0,0,0,0.12);
+        }
+
+        .feature-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .cta {
+            margin-top: 18px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .cta a {
+            display: inline-block;
+            text-decoration: none;
+            background: var(--accent);
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 10px;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .cta a:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        footer {
+            margin-top: 26px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /*
+         * Кнопка переключения темы.
+         * Требование: в правом нижнем углу (fixed).
+         */
+        .theme-toggle {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1000;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 1px solid var(--theme-btn-border);
+            background: var(--theme-btn-bg);
+            box-shadow: 0 4px 14px var(--theme-btn-shadow);
+            cursor: pointer;
+            font-size: 22px;
+            line-height: 1;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.25s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.06);
+            box-shadow: 0 6px 18px var(--theme-btn-shadow);
+        }
+
+        .theme-toggle:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 720px) {
+            h1 {
+                font-size: 30px;
+            }
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <h1>💰 Семейный бюджет</h1>
+        <p class="sub">
+            Учитывайте доходы и расходы семьи в одном месте. Подсчёт баланса выполняется автоматически,
+            а интерфейс поддерживает светлую и тёмную тему.
+        </p>
+    </header>
+
+    <section class="card">
+        <div class="features">
+            <div class="feature">
+                <div class="feature-title">Доходы и расходы</div>
+                Добавляйте категории и суммы, не отвлекаясь на ручные расчёты.
+            </div>
+            <div class="feature">
+                <div class="feature-title">Баланс в реальном времени</div>
+                Общий баланс обновляется после каждого добавления.
+            </div>
+            <div class="feature">
+                <div class="feature-title">Тема по кнопке</div>
+                Переключайте светлая/тёмная тему кнопкой в правом нижнем углу.
+            </div>
+            <div class="feature">
+                <div class="feature-title">Запоминание выбора</div>
+                Настройка темы сохраняется в `localStorage`.
+            </div>
+        </div>
+
+        <div class="cta">
+            <a href="Клькулятор.html" title="Открыть калькулятор семейного бюджета">
+                Открыть калькулятор
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        Учебный проект: чистый HTML/CSS/JS (без сборщиков).
+    </footer>
+</div>
+
+<!-- Кнопка переключения темы (правый нижний угол) -->
+<button
+    type="button"
+    id="themeToggle"
+    class="theme-toggle"
+    aria-label="Переключить тему"
+    title="Светлая / тёмная тема"
+>🌙</button>
+
+<script>
+    /* 
+     * Тема сохраняется на устройстве, чтобы при следующем открытии страницы UI выглядел так же.
+     */
+    const THEME_STORAGE_KEY = 'family-budget-theme';
+
+    function updateThemeToggleButton(theme) {
+        const btn = document.getElementById('themeToggle');
+        if (!btn) return;
+
+        if (theme === 'dark') {
+            btn.textContent = '☀️';
+            btn.setAttribute('aria-label', 'Включить светлую тему');
+            btn.setAttribute('title', 'Светлая тема');
+        } else {
+            btn.textContent = '🌙';
+            btn.setAttribute('aria-label', 'Включить тёмную тему');
+            btn.setAttribute('title', 'Тёмная тема');
+        }
+    }
+
+    function initTheme() {
+        const saved = localStorage.getItem(THEME_STORAGE_KEY);
+        let theme = saved;
+
+        if (!theme) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            theme = prefersDark ? 'dark' : 'light';
+        }
+
+        document.documentElement.setAttribute('data-theme', theme);
+        updateThemeToggleButton(theme);
+    }
+
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem(THEME_STORAGE_KEY, next);
+        updateThemeToggleButton(next);
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    initTheme();
+</script>
+</body>
+</html>
+
