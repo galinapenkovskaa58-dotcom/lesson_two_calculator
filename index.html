@@ -254,7 +254,8 @@
         const saved = localStorage.getItem(THEME_STORAGE_KEY);
         let theme = saved;
 
-        if (!theme) {
+        // Защита: в localStorage может оказаться что-то кроме 'light'/'dark'
+        if (theme !== 'light' && theme !== 'dark') {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             theme = prefersDark ? 'dark' : 'light';
         }
@@ -277,4 +278,3 @@
 </script>
 </body>
 </html>
-
